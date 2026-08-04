@@ -1,0 +1,34 @@
+{
+  "id": "echo-service",
+  "name": "Echo Service",
+  "description": "Release-backed Echo Service harness used as the baseline managed service in reference app inventories.",
+  "version": "0.3.0",
+  "enabled": true,
+  "executable": "node",
+  "args": ["./run-echo-service.mjs"],
+  "env": {
+    "ECHO_MESSAGE": "hello from service-template inventory",
+    "ECHO_PORT": "4010",
+    "ECHO_HTTP_HEALTH_PORT": "4011",
+    "ECHO_TCP_PORT": "4012",
+    "ECHO_LOG_PATH": "./runtime/echo.log",
+    "ECHO_STATE_PATH": "./runtime/state.json",
+    "ECHO_DB_PATH": "./runtime/echo.sqlite",
+    "SERVICE_LASSO_GLOBAL_ENV_JSON": "{\"ECHO_ENV_CHANNEL\":\"template\"}"
+  },
+  "urls": [
+    {
+      "label": "ui",
+      "url": "http://127.0.0.1:4010/",
+      "kind": "local"
+    },
+    {
+      "label": "service",
+      "url": "http://127.0.0.1:4010/health",
+      "kind": "local"
+    }
+  ],
+  "healthcheck": {
+    "type": "process"
+  }
+}
