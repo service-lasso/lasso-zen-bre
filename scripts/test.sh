@@ -5,73 +5,51 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 for path in \
+  "$ROOT/Cargo.toml" \
   "$ROOT/service.json" \
-  "$ROOT/verify/service-harness.json"; do
+  "$ROOT/verify/service-harness.json" \
+  "$ROOT/src/main.rs" \
+  "$ROOT/NOTICE"; do
   if [[ ! -f "$path" ]]; then
     echo "Missing required file: $path" >&2
     exit 1
   fi
 done
 
-SERVICE_ID=$(python3 - <<'PY'
-import json, pathlib
-path = pathlib.Path('service.json')
-print(json.loads(path.read_text())['id'])
-PY
-)
-if [[ "$SERVICE_ID" != "echo-service" ]]; then
-  echo "service.json id mismatch" >&2
-  exit 1
-fi
-
 python3 - <<'PY'
 import json
 import pathlib
+import re
 
-paths = [pathlib.Path('service.json')]
-services_root = pathlib.Path('services')
-if services_root.exists():
-    paths.extend(sorted(services_root.glob('**/service.json')))
+service = json.loads(pathlib.Path('service.json').read_text())
+if service.get('id') != 'zen-bre':
+    raise SystemExit('service.json id mismatch')
+if service.get('enabled') is not False:
+    raise SystemExit('zen-bre must stay disabled by default')
+upstream = service.get('meta', {}).get('upstream', {})
+if upstream.get('crate') != 'zen-engine' or upstream.get('version') != '1.0.0-beta.11':
+    raise SystemExit('upstream zen-engine pin mismatch')
+globalenv = service.get('execconfig', {}).get('globalenv', {})
+if 'ZEN_BRE_URL' not in globalenv:
+    raise SystemExit('ZEN_BRE_URL global export missing')
+if 'healthcheck' in service:
+    raise SystemExit('Singular healthcheck is not allowed; use healthchecks[].')
+if 'healthcheck' in service.get('execconfig', {}):
+    raise SystemExit('execconfig.healthcheck is not allowed; use top-level healthchecks[].')
+checks = service.get('healthchecks')
+if not isinstance(checks, list):
+    raise SystemExit('healthchecks must be an array.')
 
-for path in paths:
-    doc = json.loads(path.read_text())
-    if 'healthcheck' in doc:
-        raise SystemExit(f"Singular healthcheck is not allowed in {path}; use healthchecks[].")
-    execconfig = doc.get('execconfig')
-    if isinstance(execconfig, dict) and 'healthcheck' in execconfig:
-        raise SystemExit(f"execconfig.healthcheck is not allowed in {path}; use top-level healthchecks[].")
-    if 'healthchecks' in doc:
-        checks = doc['healthchecks']
-        if not isinstance(checks, list):
-            raise SystemExit(f"healthchecks must be an array in {path}.")
-        for check in checks:
-            if not isinstance(check, dict) or not check.get('id'):
-                raise SystemExit(f"Every healthchecks[] item needs a stable id in {path}.")
+contract = json.loads(pathlib.Path('verify/service-harness.json').read_text())
+if contract.get('serviceId') != 'zen-bre':
+    raise SystemExit('service-harness.json serviceId mismatch')
+
+cargo = pathlib.Path('Cargo.toml').read_text()
+expected = r'zen-engine = \{ version = "=1\.0\.0-beta\.11", features = \["arbitrary_precision"\] \}'
+if not re.search(expected, cargo):
+    raise SystemExit('Cargo.toml must pin zen-engine 1.0.0-beta.11 with arbitrary_precision enabled')
 PY
 
-CONTRACT_ID=$(python3 - <<'PY'
-import json, pathlib
-path = pathlib.Path('verify/service-harness.json')
-print(json.loads(path.read_text())['serviceId'])
-PY
-)
-if [[ "$CONTRACT_ID" != "echo-service" ]]; then
-  echo "service-harness.json serviceId mismatch" >&2
-  exit 1
-fi
+cargo test --locked
 
-OS_NAME=$(uname -s)
-case "$OS_NAME" in
-  Linux*) RUNTIME="$ROOT/runtime/linux/echo-service.sh" ;;
-  Darwin*) RUNTIME="$ROOT/runtime/darwin/echo-service.sh" ;;
-  *) echo "Unsupported OS for test.sh: $OS_NAME" >&2; exit 1 ;;
-esac
-
-chmod +x "$RUNTIME"
-OUTPUT=$(ECHO_MESSAGE='pipeline test message' "$RUNTIME")
-if [[ "$OUTPUT" != *"pipeline test message"* ]]; then
-  echo "Echo runtime output mismatch" >&2
-  exit 1
-fi
-
-echo "Template tests passed ($OS_NAME)"
+echo "lasso-zen-bre tests passed ($(uname -s))"

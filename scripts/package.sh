@@ -2,6 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
 DIST="$ROOT/dist"
 OS_NAME=$(uname -s)
 case "$OS_NAME" in
@@ -9,17 +11,20 @@ case "$OS_NAME" in
   Darwin*) PLATFORM="darwin" ;;
   *) echo "Unsupported OS for package.sh: $OS_NAME" >&2; exit 1 ;;
 esac
-STAGING="$DIST/echo-service-$PLATFORM"
-TAR_PATH="$DIST/echo-service-$PLATFORM.tar.gz"
+STAGING="$DIST/lasso-zen-bre-$PLATFORM"
+TAR_PATH="$DIST/lasso-zen-bre-1.0.0-beta.11-$PLATFORM.tar.gz"
+
+cargo build --release --locked
 
 mkdir -p "$DIST"
 rm -rf "$STAGING"
-mkdir -p "$STAGING"
+mkdir -p "$STAGING/decisions" "$STAGING/config" "$STAGING/logs" "$STAGING/.state"
 
-cp -R "$ROOT/runtime/$PLATFORM" "$STAGING/runtime"
-cp -R "$ROOT/config" "$STAGING/config"
-
-chmod +x "$STAGING/runtime/echo-service.sh" 2>/dev/null || true
+cp "$ROOT/target/release/lasso-zen-bre" "$STAGING/lasso-zen-bre"
+cp "$ROOT/service.json" "$STAGING/service.json"
+cp "$ROOT/LICENSE" "$STAGING/LICENSE"
+cp "$ROOT/NOTICE" "$STAGING/NOTICE"
+chmod +x "$STAGING/lasso-zen-bre"
 
 rm -f "$TAR_PATH"
 tar -czf "$TAR_PATH" -C "$STAGING" .

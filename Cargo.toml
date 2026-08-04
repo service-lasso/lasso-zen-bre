@@ -1,0 +1,14 @@
+[package]
+name = "lasso-zen-bre"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+zen-engine = { version = "=1.0.0-beta.11", features = ["arbitrary_precision"] }
+
+[profile.release]
+strip = "symbols"
+lto = "thin"
+codegen-units = 1

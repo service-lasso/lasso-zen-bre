@@ -1,7 +1,7 @@
 {
-  "serviceId": "echo-service",
+  "serviceId": "zen-bre",
   "artifact": {
-    "path": "dist/echo-service-win32.zip",
+    "path": "dist/lasso-zen-bre-1.0.0-beta.11-win32.zip",
     "kind": "archive"
   },
   "dependencies": [],
@@ -9,16 +9,21 @@
     "install": true,
     "config": true,
     "start": true,
+    "reload": true,
+    "validate": true,
     "stop": true
   },
   "health": {
-    "type": "process",
+    "type": "http",
+    "live": "/health/live",
+    "ready": "/health/ready",
     "timeoutSeconds": 30
   },
   "expect": {
     "logs": true,
     "state": true,
-    "exitClean": true
+    "exitClean": true,
+    "noDecisionPayloadLeak": true
   },
   "artifacts": {
     "captureLogs": true,
