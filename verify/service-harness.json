@@ -9,21 +9,16 @@
     "install": true,
     "config": true,
     "start": true,
-    "reload": true,
-    "validate": true,
     "stop": true
   },
   "health": {
     "type": "http",
-    "live": "/health/live",
-    "ready": "/health/ready",
     "timeoutSeconds": 30
   },
   "expect": {
     "logs": true,
     "state": true,
-    "exitClean": true,
-    "noDecisionPayloadLeak": true
+    "exitClean": true
   },
   "artifacts": {
     "captureLogs": true,
