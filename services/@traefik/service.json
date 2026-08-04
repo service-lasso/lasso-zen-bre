@@ -1,0 +1,78 @@
+{
+  "id": "@traefik",
+  "name": "Traefik Router",
+  "description": "Release-backed Traefik edge/router service for Service Lasso baseline routing.",
+  "version": "2026.4.25-5301df9",
+  "enabled": true,
+  "ports": {
+    "web": 19080,
+    "admin": 19081
+  },
+  "urls": [
+    {
+      "label": "dashboard",
+      "url": "http://127.0.0.1:${ADMIN_PORT}/dashboard/",
+      "kind": "local"
+    },
+    {
+      "label": "ping",
+      "url": "http://127.0.0.1:${ADMIN_PORT}/ping",
+      "kind": "local"
+    },
+    {
+      "label": "web",
+      "url": "http://127.0.0.1:${WEB_PORT}/",
+      "kind": "local"
+    }
+  ],
+  "artifact": {
+    "kind": "archive",
+    "source": {
+      "type": "github-release",
+      "repo": "service-lasso/lasso-traefik",
+      "tag": "2026.4.25-5301df9"
+    },
+    "platforms": {
+      "win32": {
+        "assetName": "lasso-traefik-win32.zip",
+        "assetUrl": "https://github.com/service-lasso/lasso-traefik/releases/download/2026.4.25-5301df9/lasso-traefik-win32.zip",
+        "archiveType": "zip",
+        "command": ".\\traefik.exe",
+        "args": ["--configFile=runtime/traefik.yml"]
+      },
+      "linux": {
+        "assetName": "lasso-traefik-linux.tar.gz",
+        "assetUrl": "https://github.com/service-lasso/lasso-traefik/releases/download/2026.4.25-5301df9/lasso-traefik-linux.tar.gz",
+        "archiveType": "tar.gz",
+        "command": "./traefik",
+        "args": ["--configFile=runtime/traefik.yml"]
+      },
+      "darwin": {
+        "assetName": "lasso-traefik-darwin.tar.gz",
+        "assetUrl": "https://github.com/service-lasso/lasso-traefik/releases/download/2026.4.25-5301df9/lasso-traefik-darwin.tar.gz",
+        "archiveType": "tar.gz",
+        "command": "./traefik",
+        "args": ["--configFile=runtime/traefik.yml"]
+      }
+    }
+  },
+  "install": {
+    "files": [
+      {
+        "path": "./runtime/dynamic.yml",
+        "content": "http:\n  routers: {}\n  services: {}\n"
+      }
+    ]
+  },
+  "config": {
+    "files": [
+      {
+        "path": "./runtime/traefik.yml",
+        "content": "entryPoints:\n  web:\n    address: \"127.0.0.1:${WEB_PORT}\"\n  traefik:\n    address: \"127.0.0.1:${ADMIN_PORT}\"\napi:\n  dashboard: true\nping:\n  entryPoint: traefik\nproviders:\n  file:\n    filename: \"./runtime/dynamic.yml\"\n    watch: true\nlog:\n  level: INFO\n"
+      }
+    ]
+  },
+  "healthcheck": {
+    "type": "process"
+  }
+}
