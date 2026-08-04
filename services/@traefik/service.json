@@ -1,0 +1,19 @@
+{
+  "id": "@traefik",
+  "name": "Traefik Router",
+  "description": "Baseline edge/router manifest for inventories that expose Service Admin or other local services.",
+  "version": "0.1.0",
+  "enabled": false,
+  "executable": "traefik",
+  "args": ["version"],
+  "healthcheck": {
+    "type": "process"
+  },
+  "urls": [
+    {
+      "label": "docs",
+      "url": "https://traefik.io",
+      "kind": "external"
+    }
+  ]
+}
