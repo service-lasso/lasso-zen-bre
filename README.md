@@ -35,6 +35,8 @@ selection lands in core.
 
 Each release also contains the exact pinned release `service.json`,
 `SHA256SUMS.txt`, `SBOM.cdx.json` and GitHub build-provenance attestations.
+Every platform archive includes `BUILD-IDENTITY.json`; native smoke tests also
+assert that `/version` reports the same full commit SHA before publication.
 
 ## HTTP API
 

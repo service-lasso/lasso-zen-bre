@@ -38,6 +38,7 @@ cp "$ROOT/NOTICE" "$STAGING/NOTICE"
 cp "$ROOT/README.md" "$STAGING/README.md"
 cp "$ROOT/THIRD_PARTY_LICENSES/zen-engine-MIT.txt" "$STAGING/THIRD_PARTY_LICENSES/zen-engine-MIT.txt"
 cp "$ROOT/examples/decisions/example.json" "$STAGING/decisions/example.json"
+python3 "$ROOT/scripts/write_build_metadata.py" "$STAGING/BUILD-IDENTITY.json" "$TARGET_TRIPLE"
 chmod +x "$STAGING/lasso-zen-bre"
 
 rm -f "$ARCHIVE"
@@ -47,6 +48,7 @@ tar -czf "$ARCHIVE" -C "$STAGING" \
   LICENSE \
   NOTICE \
   README.md \
+  BUILD-IDENTITY.json \
   THIRD_PARTY_LICENSES \
   decisions \
   config \
@@ -56,6 +58,7 @@ tar -czf "$ARCHIVE" -C "$STAGING" \
 ARCHIVE_CONTENTS="$(tar -tzf "$ARCHIVE")"
 grep -Eq '^(\./)?lasso-zen-bre$' <<<"$ARCHIVE_CONTENTS"
 grep -Eq '^(\./)?service.json$' <<<"$ARCHIVE_CONTENTS"
+grep -Eq '^(\./)?BUILD-IDENTITY.json$' <<<"$ARCHIVE_CONTENTS"
 grep -Eq '^(\./)?decisions/example.json$' <<<"$ARCHIVE_CONTENTS"
 
 echo "Created $ARCHIVE"

@@ -33,6 +33,7 @@ required = [
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_LICENSES/zen-engine-MIT.txt",
+    "scripts/write_build_metadata.py",
     "README.md",
 ]
 for relative in required:
@@ -118,5 +119,9 @@ for asset in ALL_ASSETS:
 for required_release_output in ("SHA256SUMS.txt", "SBOM.cdx.json", "attest-build-provenance"):
     if required_release_output not in release:
         fail(f"release workflow is missing {required_release_output}")
+
+for package_script in ("scripts/package.sh", "scripts/package.ps1"):
+    if "BUILD-IDENTITY.json" not in (ROOT / package_script).read_text():
+        fail(f"{package_script} does not package build identity metadata")
 
 print("repository contract validation passed")
