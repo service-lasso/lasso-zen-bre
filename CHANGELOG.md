@@ -13,3 +13,5 @@
 - add checksums, CycloneDX SBOM, provenance and post-publication verification
 - pin every archive's embedded `service.json` to its release tag and require it
   to match the attached manifest byte-for-byte
+- remove unsupported descriptive custom-action modes so the released manifest
+  validates against the current Service Lasso core contract
