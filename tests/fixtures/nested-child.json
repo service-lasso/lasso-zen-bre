@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"expression",
+      "type":"expressionNode",
+      "name":"Double",
+      "content":{"expressions":[{"id":"double","key":"doubled","value":"input * 2"}]}
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"expression"},
+    {"id":"edge-2","sourceId":"expression","type":"edge","targetId":"output"}
+  ]
+}

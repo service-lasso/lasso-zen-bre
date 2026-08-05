@@ -1,9 +1,10 @@
 {
+  "$schema": "https://service-lasso.dev/schemas/service.schema.json",
   "id": "zen-bre",
   "name": "GoRules ZEN Business Rules Engine",
-  "description": "Local-first Service Lasso managed HTTP wrapper around the embedded GoRules ZEN engine.",
-  "enabled": false,
+  "description": "Portable local HTTP decision service powered by the embedded GoRules ZEN engine.",
   "version": "0.1.0",
+  "enabled": false,
   "logoutput": true,
   "icon": [
     {
@@ -11,51 +12,111 @@
       "name": "workflow"
     }
   ],
-  "servicetype": 50,
-  "servicelocation": 10,
   "endpoints": [
     {
-      "name": "http",
+      "id": "http",
+      "kind": "network",
+      "label": "ZEN BRE HTTP API",
+      "direction": "inbound",
+      "transport": "tcp",
       "protocol": "http",
       "bind": "127.0.0.1",
-      "allocation": "preferred",
-      "preferred": 18089,
-      "url": "http://${ENDPOINT_HTTP_HOST}:${ENDPOINT_HTTP_PORT}/"
-    }
-  ],
-  "urls": [
+      "port": {
+        "default": 18089,
+        "strategy": "preferred"
+      },
+      "exposure": "local",
+      "required": true,
+      "primary": true
+    },
     {
-      "label": "api",
-      "url": "${ZEN_BRE_URL}",
-      "kind": "local"
+      "id": "base_url",
+      "kind": "url",
+      "label": "ZEN BRE API",
+      "target": "http",
+      "url": "http://${endpoint.http.bind}:${endpoint.http.port}",
+      "exposure": "local",
+      "required": true,
+      "primary": true
+    },
+    {
+      "id": "live",
+      "kind": "url",
+      "label": "ZEN BRE liveness",
+      "target": "http",
+      "url": "${endpoint.base_url.url}/health/live",
+      "exposure": "local",
+      "required": true
+    },
+    {
+      "id": "ready",
+      "kind": "url",
+      "label": "ZEN BRE readiness",
+      "target": "http",
+      "url": "${endpoint.base_url.url}/health/ready",
+      "exposure": "local",
+      "required": true
     }
   ],
-  "exports": [
-    "ZEN_BRE_URL",
-    "ZEN_BRE_DECISIONS_DIR",
-    "ZEN_BRE_VERSION"
+  "env": {
+    "ZEN_BRE_URL": "${endpoint.base_url.url}",
+    "ZEN_BRE_HOST": "${endpoint.http.bind}",
+    "ZEN_BRE_PORT": "${endpoint.http.port}",
+    "ZEN_BRE_DECISIONS_DIR": "${SERVICE_ROOT}/decisions",
+    "ZEN_BRE_VERSION": "0.1.0",
+    "ZEN_BRE_MAX_BODY_BYTES": "1048576",
+    "ZEN_BRE_MAX_MODEL_BYTES": "4194304",
+    "ZEN_BRE_MAX_TOTAL_MODEL_BYTES": "67108864",
+    "ZEN_BRE_MAX_MODELS": "1000",
+    "ZEN_BRE_MAX_CONCURRENCY": "32",
+    "ZEN_BRE_EVALUATION_TIMEOUT_MS": "5000",
+    "ZEN_BRE_MAX_DEPTH": "10",
+    "ZEN_BRE_MAX_JSON_DEPTH": "64",
+    "RUST_LOG": "info"
+  },
+  "globalenv": {
+    "ZEN_BRE_URL": "${endpoint.base_url.url}",
+    "ZEN_BRE_DECISIONS_DIR": "${SERVICE_ROOT}/decisions",
+    "ZEN_BRE_VERSION": "0.1.0"
+  },
+  "healthchecks": [
+    {
+      "id": "zen-bre-ready",
+      "type": "http",
+      "url": "${endpoint.ready.url}",
+      "expected_status": 200,
+      "retries": 80,
+      "interval": 250,
+      "timeout": 2000
+    }
   ],
   "files": {
+    "enabled": true,
     "roots": [
       {
         "id": "decisions",
-        "path": "${SERVICE_ROOT}/decisions",
-        "description": "Operator-managed JDM JSON files."
+        "label": "Decisions",
+        "path": "decisions",
+        "mode": "read-write"
       },
       {
         "id": "config",
-        "path": "${SERVICE_ROOT}/config",
-        "description": "Generated non-secret configuration."
+        "label": "Configuration",
+        "path": "config",
+        "mode": "read-write"
       },
       {
         "id": "logs",
-        "path": "${SERVICE_ROOT}/logs",
-        "description": "Structured service logs."
+        "label": "Logs",
+        "path": "logs",
+        "mode": "read-only"
       },
       {
         "id": "state",
-        "path": "${SERVICE_ROOT}/.state",
-        "description": "Compiled registry and reload metadata only."
+        "label": "Registry state",
+        "path": ".state",
+        "mode": "read-only",
+        "protected": true
       }
     ]
   },
@@ -63,6 +124,131 @@
     "default": {
       "path": "logs/zen-bre.log"
     }
+  },
+  "artifact": {
+    "kind": "archive",
+    "source": {
+      "type": "github-release",
+      "repo": "service-lasso/lasso-zen-bre",
+      "channel": "latest"
+    },
+    "platforms": {
+      "win32": {
+        "assetName": "lasso-zen-bre-1.0.0-beta.11-windows-x64.zip",
+        "archiveType": "zip",
+        "command": ".\\lasso-zen-bre.exe",
+        "args": [
+          "--service-root",
+          "${SERVICE_ROOT}",
+          "--host",
+          "${endpoint.http.bind}",
+          "--port",
+          "${endpoint.http.port}",
+          "--decisions-dir",
+          "${SERVICE_ROOT}/decisions"
+        ],
+        "checksum": {
+          "algorithm": "sha256",
+          "assetName": "SHA256SUMS.txt"
+        }
+      },
+      "linux": {
+        "assetName": "lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz",
+        "archiveType": "tar.gz",
+        "command": "./lasso-zen-bre",
+        "args": [
+          "--service-root",
+          "${SERVICE_ROOT}",
+          "--host",
+          "${endpoint.http.bind}",
+          "--port",
+          "${endpoint.http.port}",
+          "--decisions-dir",
+          "${SERVICE_ROOT}/decisions"
+        ],
+        "checksum": {
+          "algorithm": "sha256",
+          "assetName": "SHA256SUMS.txt"
+        }
+      },
+      "darwin": {
+        "assetName": "lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz",
+        "archiveType": "tar.gz",
+        "command": "./lasso-zen-bre",
+        "args": [
+          "--service-root",
+          "${SERVICE_ROOT}",
+          "--host",
+          "${endpoint.http.bind}",
+          "--port",
+          "${endpoint.http.port}",
+          "--decisions-dir",
+          "${SERVICE_ROOT}/decisions"
+        ],
+        "checksum": {
+          "algorithm": "sha256",
+          "assetName": "SHA256SUMS.txt"
+        }
+      }
+    }
+  },
+  "actions": {
+    "install": {
+      "description": "Acquire and verify the packaged ZEN BRE runtime artifact.",
+      "mode": "converge-install",
+      "idempotent": true
+    },
+    "config": {
+      "description": "Materialise the bounded decisions, config, logs and state workspace.",
+      "mode": "converge-config",
+      "idempotent": true
+    },
+    "validate": {
+      "description": "Parse and compile the decision registry without exposing decision source or values.",
+      "mode": "runtime-validate",
+      "idempotent": true
+    },
+    "reload": {
+      "description": "Atomically rescan and compile decision files.",
+      "mode": "runtime-reload",
+      "idempotent": false
+    },
+    "update": {
+      "description": "Acquire a newer verified release and reconcile it before restart.",
+      "mode": "converge-update",
+      "idempotent": true
+    },
+    "start": {
+      "description": "Start the ZEN BRE HTTP service.",
+      "mode": "runtime-start",
+      "idempotent": true
+    },
+    "stop": {
+      "description": "Stop the ZEN BRE HTTP service gracefully.",
+      "mode": "runtime-stop",
+      "idempotent": true
+    },
+    "restart": {
+      "description": "Restart ZEN BRE after configuration, decision or artifact changes.",
+      "mode": "runtime-restart",
+      "idempotent": false
+    },
+    "rollback": {
+      "description": "Restore the previously verified artifact after a failed update.",
+      "mode": "state-rollback",
+      "idempotent": false
+    }
+  },
+  "execconfig": {
+    "debuglog": true,
+    "serviceorder": 100
+  },
+  "depend_on": [],
+  "updates": {
+    "enabled": true,
+    "mode": "notify",
+    "track": "latest",
+    "checkIntervalSeconds": 3600
   },
   "meta": {
     "developers": [
@@ -85,15 +271,6 @@
     "websiteUrl": "https://github.com/service-lasso/lasso-zen-bre",
     "documentationUrl": "https://github.com/service-lasso/lasso-zen-bre/blob/develop/README.md",
     "issuesUrl": "https://github.com/service-lasso/lasso-zen-bre/issues",
-    "support": {
-      "issuesUrl": "https://github.com/service-lasso/lasso-zen-bre/issues"
-    },
-    "links": {
-      "repository": "https://github.com/service-lasso/lasso-zen-bre",
-      "issues": "https://github.com/service-lasso/lasso-zen-bre/issues",
-      "documentation": "https://github.com/service-lasso/lasso-zen-bre/blob/develop/README.md",
-      "upstream": "https://github.com/gorules/zen"
-    },
     "tags": [
       "service-lasso",
       "decision-service",
@@ -101,117 +278,5 @@
       "gorules",
       "zen-engine"
     ]
-  },
-  "artifact": {
-    "kind": "archive",
-    "source": {
-      "type": "github-release",
-      "repo": "service-lasso/lasso-zen-bre",
-      "channel": "latest"
-    },
-    "platforms": {
-      "win32": {
-        "assetName": "lasso-zen-bre-1.0.0-beta.11-win32.zip",
-        "archiveType": "zip",
-        "command": "./lasso-zen-bre.exe",
-        "args": []
-      },
-      "linux": {
-        "assetName": "lasso-zen-bre-1.0.0-beta.11-linux.tar.gz",
-        "archiveType": "tar.gz",
-        "command": "./lasso-zen-bre",
-        "args": []
-      },
-      "darwin": {
-        "assetName": "lasso-zen-bre-1.0.0-beta.11-darwin.tar.gz",
-        "archiveType": "tar.gz",
-        "command": "./lasso-zen-bre",
-        "args": []
-      }
-    }
-  },
-  "actions": {
-    "install": {
-      "description": "Acquire or unpack the packaged ZEN BRE runtime artifact.",
-      "mode": "converge-install",
-      "idempotent": true
-    },
-    "config": {
-      "description": "Materialize non-secret ZEN BRE configuration and workspace directories.",
-      "mode": "converge-config",
-      "idempotent": true
-    },
-    "validate": {
-      "description": "Validate the decision registry without exposing source or inputs.",
-      "mode": "runtime-validate",
-      "idempotent": true
-    },
-    "reload": {
-      "description": "Rescan and recompile decision files from the decisions workspace.",
-      "mode": "runtime-reload",
-      "idempotent": false
-    },
-    "update": {
-      "description": "Apply a newer release artifact and reconcile update-time changes before restart.",
-      "mode": "converge-update",
-      "idempotent": true
-    },
-    "start": {
-      "description": "Start the ZEN BRE HTTP service.",
-      "mode": "runtime-start",
-      "idempotent": true
-    },
-    "stop": {
-      "description": "Stop the ZEN BRE HTTP service gracefully.",
-      "mode": "runtime-stop",
-      "idempotent": true
-    },
-    "restart": {
-      "description": "Restart the ZEN BRE service after config, model or update changes.",
-      "mode": "runtime-restart",
-      "idempotent": false
-    },
-    "rollback": {
-      "description": "Restore the previously deployed artifact if an update fails validation.",
-      "mode": "state-rollback",
-      "idempotent": false
-    }
-  },
-  "execconfig": {
-    "serviceorder": 100,
-    "serviceport": 0,
-    "execcwd": ".",
-    "executable": "lasso-zen-bre",
-    "args": [
-      "--host",
-      "${ENDPOINT_HTTP_HOST}",
-      "--port",
-      "${ENDPOINT_HTTP_PORT}",
-      "--decisions-dir",
-      "${SERVICE_ROOT}/decisions"
-    ],
-    "env": {
-      "ZEN_BRE_URL": "http://${ENDPOINT_HTTP_HOST}:${ENDPOINT_HTTP_PORT}",
-      "ZEN_BRE_DECISIONS_DIR": "${SERVICE_ROOT}/decisions",
-      "ZEN_BRE_VERSION": "0.1.0"
-    },
-    "globalenv": {
-      "ZEN_BRE_URL": "http://${ENDPOINT_HTTP_HOST}:${ENDPOINT_HTTP_PORT}",
-      "ZEN_BRE_DECISIONS_DIR": "${SERVICE_ROOT}/decisions",
-      "ZEN_BRE_VERSION": "0.1.0"
-    },
-    "depend_on": []
-  },
-  "healthchecks": [
-    {
-      "id": "live",
-      "type": "http",
-      "url": "${ZEN_BRE_URL}/health/live"
-    },
-    {
-      "id": "ready",
-      "type": "http",
-      "url": "${ZEN_BRE_URL}/health/ready"
-    }
-  ]
+  }
 }

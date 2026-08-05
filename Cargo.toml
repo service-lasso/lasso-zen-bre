@@ -6,9 +6,20 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
+arc-swap = "1.7"
+axum = { version = "0.8", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+tokio = { version = "1", features = ["macros", "net", "rt", "rt-multi-thread", "signal", "sync", "time"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
 zen-engine = { version = "=1.0.0-beta.11", features = ["arbitrary_precision"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3"
+tower = { version = "0.5", features = ["util"] }
 
 [profile.release]
 strip = "symbols"
-lto = "thin"
 codegen-units = 1

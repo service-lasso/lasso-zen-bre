@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"function",
+      "type":"functionNode",
+      "name":"Double",
+      "content":"const handler = (input) => ({ output: input.input * 2 });"
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"function"},
+    {"id":"edge-2","sourceId":"function","type":"edge","targetId":"output"}
+  ]
+}

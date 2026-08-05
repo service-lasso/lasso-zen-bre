@@ -21,10 +21,24 @@ RESOLVED_CONTRACT="$ROOT/verify/service-harness.ci.json"
 RUN_OUTPUT_DIR="$OUTPUT_DIR/harness-run"
 OS_NAME=$(uname -s)
 case "$OS_NAME" in
-  Linux*) ARTIFACT_PATH="../dist/lasso-zen-bre-1.0.0-beta.11-linux.tar.gz" ;;
-  Darwin*) ARTIFACT_PATH="../dist/lasso-zen-bre-1.0.0-beta.11-darwin.tar.gz" ;;
+  Linux*)
+    case "$(uname -m)" in
+      x86_64) ASSET_PLATFORM_VALUE="linux-x64" ;;
+      aarch64|arm64) ASSET_PLATFORM_VALUE="linux-arm64" ;;
+      *) echo "Unsupported Linux architecture: $(uname -m)" >&2; exit 1 ;;
+    esac
+    ;;
+  Darwin*)
+    case "$(uname -m)" in
+      x86_64) ASSET_PLATFORM_VALUE="macos-x64" ;;
+      arm64) ASSET_PLATFORM_VALUE="macos-arm64" ;;
+      *) echo "Unsupported macOS architecture: $(uname -m)" >&2; exit 1 ;;
+    esac
+    ;;
   *) echo "Unsupported OS for verify.sh: $OS_NAME" >&2; exit 1 ;;
 esac
+ASSET_PLATFORM_VALUE="${ASSET_PLATFORM:-$ASSET_PLATFORM_VALUE}"
+ARTIFACT_PATH="../dist/lasso-zen-bre-1.0.0-beta.11-$ASSET_PLATFORM_VALUE.tar.gz"
 
 python3 - "$CONTRACT" "$RESOLVED_CONTRACT" "$ARTIFACT_PATH" <<'PY'
 import json

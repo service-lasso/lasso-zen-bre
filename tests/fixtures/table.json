@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"table",
+      "type":"decisionTableNode",
+      "name":"Threshold",
+      "content":{
+        "hitPolicy":"first",
+        "inputs":[{"field":"input","id":"input-column","name":"Input","type":"expression"}],
+        "outputs":[{"field":"output","id":"output-column","name":"Output","type":"expression"}],
+        "rules":[
+          {"_id":"above","input-column":"> 10","output-column":"10"},
+          {"_id":"fallback","input-column":"","output-column":"0"}
+        ]
+      }
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"table"},
+    {"id":"edge-2","sourceId":"table","type":"edge","targetId":"output"}
+  ]
+}

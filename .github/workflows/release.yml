@@ -1,47 +1,122 @@
-name: Release
+name: Build, verify and release
 
 on:
+  pull_request:
+    branches:
+      - develop
   push:
     branches:
       - develop
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: lasso-zen-bre-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
+  ENGINE_VERSION: 1.0.0-beta.11
+  LASSO_ZEN_BRE_BUILD_SHA: ${{ github.sha }}
   SERVICE_LASSO_HARNESS_REPO: service-lasso/service-lasso-harness
   SERVICE_LASSO_HARNESS_VERSION: v0.1.1
 
 jobs:
   build:
+    name: ${{ matrix.asset_platform }} package
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            platform: win32
-            artifact: dist/lasso-zen-bre-1.0.0-beta.11-win32.zip
-            archive_name: service-lasso-harness-windows-amd64.zip
-            binary_name: service-lasso-harness.exe
+            target: x86_64-pc-windows-msvc
+            asset_platform: windows-x64
+            archive: dist/lasso-zen-bre-1.0.0-beta.11-windows-x64.zip
+            harness_archive: service-lasso-harness-windows-amd64.zip
+            harness_binary: service-lasso-harness.exe
+            harness_platform: win32
           - os: ubuntu-latest
-            platform: linux
-            artifact: dist/lasso-zen-bre-1.0.0-beta.11-linux.tar.gz
-            archive_name: service-lasso-harness-linux-amd64.tar.gz
-            binary_name: service-lasso-harness
-          - os: macos-14
-            platform: darwin
-            artifact: dist/lasso-zen-bre-1.0.0-beta.11-darwin.tar.gz
-            archive_name: service-lasso-harness-darwin-arm64.tar.gz
-            binary_name: service-lasso-harness
+            target: x86_64-unknown-linux-gnu
+            asset_platform: linux-x64
+            archive: dist/lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz
+            harness_archive: service-lasso-harness-linux-amd64.tar.gz
+            harness_binary: service-lasso-harness
+            harness_platform: linux
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            asset_platform: linux-arm64
+            archive: dist/lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz
+            harness_archive: ""
+            harness_binary: ""
+            harness_platform: ""
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            asset_platform: macos-x64
+            archive: dist/lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz
+            harness_archive: ""
+            harness_binary: ""
+            harness_platform: ""
+          - os: macos-15
+            target: aarch64-apple-darwin
+            asset_platform: macos-arm64
+            archive: dist/lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz
+            harness_archive: service-lasso-harness-darwin-arm64.tar.gz
+            harness_binary: service-lasso-harness
+            harness_platform: darwin
 
     runs-on: ${{ matrix.os }}
-
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Download released service-lasso-harness binary
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: ${{ matrix.target }}
+
+      - name: Validate and test service
+        if: runner.os != 'Windows'
+        shell: bash
+        run: bash ./scripts/test.sh
+
+      - name: Validate and test service on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .\scripts\test.ps1
+
+      - name: Package service
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          TARGET_TRIPLE: ${{ matrix.target }}
+          ASSET_PLATFORM: ${{ matrix.asset_platform }}
+        run: bash ./scripts/package.sh
+
+      - name: Package service on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          TARGET_TRIPLE: ${{ matrix.target }}
+          ASSET_PLATFORM: ${{ matrix.asset_platform }}
+        run: .\scripts\package.ps1
+
+      - name: Smoke test packaged service
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          TARGET_TRIPLE: ${{ matrix.target }}
+          ASSET_PLATFORM: ${{ matrix.asset_platform }}
+        run: bash ./scripts/smoke.sh
+
+      - name: Smoke test packaged service on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .\scripts\smoke.ps1
+
+      - name: Download Service Lasso harness
+        if: matrix.harness_archive != ''
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
@@ -50,90 +125,77 @@ jobs:
           mkdir -p .harness/download .harness/bin
           gh release download "$SERVICE_LASSO_HARNESS_VERSION" \
             --repo "$SERVICE_LASSO_HARNESS_REPO" \
-            --pattern "${{ matrix.archive_name }}" \
+            --pattern "${{ matrix.harness_archive }}" \
             --dir .harness/download
 
-      - name: Extract released harness binary (Windows)
-        if: runner.os == 'Windows'
+      - name: Extract Service Lasso harness on Windows
+        if: runner.os == 'Windows' && matrix.harness_archive != ''
         shell: pwsh
         run: |
-          Expand-Archive -Path ".harness/download/${{ matrix.archive_name }}" -DestinationPath ".harness/bin" -Force
-          $bin = Get-ChildItem ".harness/bin" -Recurse -Filter "${{ matrix.binary_name }}" | Select-Object -First 1
-          if (-not $bin) {
-            throw "Harness binary not found under .harness/bin"
-          }
-          $binDir = $bin.Directory.FullName
-          $binPath = $bin.FullName
-          Add-Content -Path $env:GITHUB_PATH -Value $binDir
-          Add-Content -Path $env:GITHUB_ENV -Value "SERVICE_LASSO_HARNESS_BIN=$binPath"
+          Expand-Archive -Path ".harness/download/${{ matrix.harness_archive }}" -DestinationPath ".harness/bin" -Force
+          $bin = Get-ChildItem ".harness/bin" -Recurse -Filter "${{ matrix.harness_binary }}" | Select-Object -First 1
+          if (-not $bin) { throw "Harness binary not found" }
+          Add-Content -Path $env:GITHUB_ENV -Value "SERVICE_LASSO_HARNESS_BIN=$($bin.FullName)"
 
-      - name: Extract released harness binary (POSIX)
-        if: runner.os != 'Windows'
+      - name: Extract Service Lasso harness on POSIX
+        if: runner.os != 'Windows' && matrix.harness_archive != ''
         shell: bash
         run: |
           set -euo pipefail
-          tar -xzf ".harness/download/${{ matrix.archive_name }}" -C .harness/bin
-          BIN_PATH="$(find "$PWD/.harness/bin" -type f -name "${{ matrix.binary_name }}" | head -n 1)"
+          tar -xzf ".harness/download/${{ matrix.harness_archive }}" -C .harness/bin
+          BIN_PATH="$(find "$PWD/.harness/bin" -type f -name '${{ matrix.harness_binary }}' | head -n 1)"
           if [[ -z "$BIN_PATH" || ! -x "$BIN_PATH" ]]; then
-            echo "Harness binary not found under .harness/bin" >&2
+            echo "Harness binary not found" >&2
             exit 1
           fi
-          BIN_DIR="$(dirname "$BIN_PATH")"
-          echo "$BIN_DIR" >> "$GITHUB_PATH"
           echo "SERVICE_LASSO_HARNESS_BIN=$BIN_PATH" >> "$GITHUB_ENV"
 
-      - name: Validate template (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: .\scripts\test.ps1
-
-      - name: Validate template (POSIX)
-        if: runner.os != 'Windows'
+      - name: Verify lifecycle through Service Lasso harness
+        if: runner.os != 'Windows' && matrix.harness_archive != ''
         shell: bash
-        run: bash ./scripts/test.sh
+        env:
+          ASSET_PLATFORM: ${{ matrix.asset_platform }}
+        run: bash ./scripts/verify.sh
 
-      - name: Package artifact (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: .\scripts\package.ps1
-
-      - name: Package artifact (POSIX)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: bash ./scripts/package.sh
-
-      - name: Verify via released harness (Windows)
-        if: runner.os == 'Windows'
+      - name: Verify lifecycle through Service Lasso harness on Windows
+        if: runner.os == 'Windows' && matrix.harness_archive != ''
         shell: pwsh
         run: .\scripts\verify.ps1
-
-      - name: Verify via released harness (POSIX)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: bash ./scripts/verify.sh
 
       - name: Upload packaged artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lasso-zen-bre-${{ matrix.platform }}
-          path: ${{ matrix.artifact }}
+          name: lasso-zen-bre-${{ matrix.asset_platform }}
+          path: ${{ matrix.archive }}
+          if-no-files-found: error
 
-      - name: Upload verify artifacts
-        if: always()
+      - name: Upload lifecycle evidence
+        if: always() && matrix.harness_archive != ''
         uses: actions/upload-artifact@v4
         with:
-          name: verify-${{ matrix.platform }}
+          name: verify-${{ matrix.harness_platform }}
           path: output/verify
           if-no-files-found: warn
 
   release:
+    name: publish verified release
     needs: build
     if: github.ref == 'refs/heads/develop' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    outputs:
+      tag: ${{ steps.version.outputs.value }}
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Download packaged artifacts
         uses: actions/download-artifact@v4
@@ -142,29 +204,81 @@ jobs:
           pattern: lasso-zen-bre-*
           merge-multiple: true
 
-      - name: Copy service manifest into release assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp service.json release-assets/service.json
-
       - name: Compute release version
         id: version
         shell: bash
         run: |
           short_sha="${GITHUB_SHA::7}"
-          version="$(date -u +%Y.%-m.%-d)-${short_sha}"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          release_version="$(date -u +%Y.%-m.%-d)-${short_sha}"
+          echo "value=$release_version" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release
+      - name: Prepare pinned release manifest
+        shell: bash
+        run: python3 ./scripts/prepare_release.py service.json "${{ steps.version.outputs.value }}" release-assets/service.json
+
+      - name: Generate CycloneDX SBOM
+        shell: bash
+        run: python3 ./scripts/generate_sbom.py release-assets/SBOM.cdx.json
+
+      - name: Generate release checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          sha256sum \
+            lasso-zen-bre-1.0.0-beta.11-windows-x64.zip \
+            lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz \
+            service.json \
+            SBOM.cdx.json > SHA256SUMS.txt
+
+      - name: Verify complete release set
+        shell: bash
+        run: python3 ./scripts/verify_release.py release-assets "${{ steps.version.outputs.value }}" "$GITHUB_SHA"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: release-assets/*
+
+      - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.value }}
+          name: ${{ steps.version.outputs.value }}
           target_commitish: ${{ github.sha }}
-          files: |
-            release-assets/lasso-zen-bre-1.0.0-beta.11-win32.zip
-            release-assets/lasso-zen-bre-1.0.0-beta.11-linux.tar.gz
-            release-assets/lasso-zen-bre-1.0.0-beta.11-darwin.tar.gz
-            release-assets/service.json
+          make_latest: true
           generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release-assets/lasso-zen-bre-1.0.0-beta.11-windows-x64.zip
+            release-assets/lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz
+            release-assets/service.json
+            release-assets/SHA256SUMS.txt
+            release-assets/SBOM.cdx.json
+
+  verify-published:
+    name: verify published release assets
+    needs: release
+    if: needs.release.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Download published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh release download "${{ needs.release.outputs.tag }}" --dir published-assets
+
+      - name: Verify published files
+        shell: bash
+        run: python3 ./scripts/verify_release.py published-assets "${{ needs.release.outputs.tag }}" "$GITHUB_SHA"
