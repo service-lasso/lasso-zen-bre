@@ -11,3 +11,5 @@
 - add Windows x64, Linux x64/ARM64 and macOS x64/ARM64 release packages
 - add runtime-checked and archive-contained build identity metadata
 - add checksums, CycloneDX SBOM, provenance and post-publication verification
+- pin every archive's embedded `service.json` to its release tag and require it
+  to match the attached manifest byte-for-byte

@@ -103,6 +103,17 @@ required_archive_files = {
     "BUILD-IDENTITY.json",
     "decisions/example.json",
 }
+released_service_path = assets_dir / "service.json"
+if not released_service_path.is_file():
+    fail("missing released service.json")
+released_service_bytes = released_service_path.read_bytes()
+service = json.loads(released_service_bytes)
+source = service.get("artifact", {}).get("source", {})
+if source.get("tag") != release_tag or "channel" in source:
+    fail("released service.json is not pinned to its release tag")
+if service.get("updates", {}).get("mode") != "disabled":
+    fail("released service.json must remain pinned")
+
 for filename, (file_format, architecture, binary_name, target_triple) in archives.items():
     path = assets_dir / filename
     if not path.is_file():
@@ -122,6 +133,8 @@ for filename, (file_format, architecture, binary_name, target_triple) in archive
     if forbidden:
         fail(f"{filename} contains runtime/operator data: {forbidden}")
     verify_binary(files[binary_name], file_format, architecture, filename)
+    if files["service.json"] != released_service_bytes:
+        fail(f"{filename} does not embed the exact released service.json")
     embedded = json.loads(files["service.json"])
     if embedded.get("version") != "0.1.0":
         fail(f"{filename} embeds the wrong wrapper version")
@@ -136,13 +149,6 @@ for filename, (file_format, architecture, binary_name, target_triple) in archive
         "targetTriple": target_triple,
     }:
         fail(f"{filename} contains invalid build identity metadata")
-
-service = json.loads((assets_dir / "service.json").read_text())
-source = service.get("artifact", {}).get("source", {})
-if source.get("tag") != release_tag or "channel" in source:
-    fail("released service.json is not pinned to its release tag")
-if service.get("updates", {}).get("mode") != "disabled":
-    fail("released service.json must remain pinned")
 
 sbom = json.loads((assets_dir / "SBOM.cdx.json").read_text())
 components = {(item.get("name"), item.get("version")) for item in sbom.get("components", [])}

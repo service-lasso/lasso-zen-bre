@@ -35,6 +35,8 @@ selection lands in core.
 
 Each release also contains the exact pinned release `service.json`,
 `SHA256SUMS.txt`, `SBOM.cdx.json` and GitHub build-provenance attestations.
+The separately attached manifest and the manifest embedded in every platform
+archive are byte-for-byte identical and pinned to that release tag.
 Every platform archive includes `BUILD-IDENTITY.json`; native smoke tests also
 assert that `/version` reports the same full commit SHA before publication.
 
