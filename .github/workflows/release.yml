@@ -163,7 +163,7 @@ jobs:
         run: .\scripts\verify.ps1
 
       - name: Upload packaged artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lasso-zen-bre-${{ matrix.asset_platform }}
           path: ${{ matrix.archive }}
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload lifecycle evidence
         if: always() && matrix.harness_archive != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: verify-${{ matrix.harness_platform }}
           path: output/verify
