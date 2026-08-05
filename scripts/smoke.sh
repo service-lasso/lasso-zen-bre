@@ -52,22 +52,28 @@ for _ in $(seq 1 80); do
 done
 
 curl --silent --fail "http://127.0.0.1:$PORT/health/ready" >"$TEMP_DIR/ready.json"
+curl --silent --fail "http://127.0.0.1:$PORT/version" >"$TEMP_DIR/version.json"
 curl --silent --fail \
   -H 'content-type: application/json' \
   --data '{}' \
   "http://127.0.0.1:$PORT/v1/decisions/example/evaluate" >"$TEMP_DIR/evaluation.json"
 
-python3 - "$TEMP_DIR/ready.json" "$TEMP_DIR/evaluation.json" <<'PY'
+python3 - "$TEMP_DIR/ready.json" "$TEMP_DIR/evaluation.json" "$TEMP_DIR/version.json" <<'PY'
 import json
+import os
 import pathlib
 import sys
 
 ready = json.loads(pathlib.Path(sys.argv[1]).read_text())
 evaluation = json.loads(pathlib.Path(sys.argv[2]).read_text())
+version = json.loads(pathlib.Path(sys.argv[3]).read_text())
 if ready.get('status') != 'ready' or ready.get('engineVersion') != '1.0.0-beta.11':
     raise SystemExit('packaged readiness response is invalid')
 if evaluation.get('result', {}).get('message') != 'Hello from Service Lasso ZEN BRE':
     raise SystemExit('packaged decision evaluation is invalid')
+expected_build = os.environ.get('LASSO_ZEN_BRE_BUILD_SHA', 'development')
+if version.get('buildIdentity') != expected_build:
+    raise SystemExit('packaged version response has the wrong build identity')
 PY
 
 kill -TERM "$PROCESS_ID"

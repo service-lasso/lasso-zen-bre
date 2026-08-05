@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import hashlib
-import io
 import json
 import pathlib
 import struct
@@ -17,11 +16,11 @@ release_tag = sys.argv[2]
 commit_sha = sys.argv[3]
 engine_version = "1.0.0-beta.11"
 archives = {
-    f"lasso-zen-bre-{engine_version}-windows-x64.zip": ("pe", "x64", "lasso-zen-bre.exe"),
-    f"lasso-zen-bre-{engine_version}-linux-x64.tar.gz": ("elf", "x64", "lasso-zen-bre"),
-    f"lasso-zen-bre-{engine_version}-linux-arm64.tar.gz": ("elf", "arm64", "lasso-zen-bre"),
-    f"lasso-zen-bre-{engine_version}-macos-x64.tar.gz": ("macho", "x64", "lasso-zen-bre"),
-    f"lasso-zen-bre-{engine_version}-macos-arm64.tar.gz": ("macho", "arm64", "lasso-zen-bre"),
+    f"lasso-zen-bre-{engine_version}-windows-x64.zip": ("pe", "x64", "lasso-zen-bre.exe", "x86_64-pc-windows-msvc"),
+    f"lasso-zen-bre-{engine_version}-linux-x64.tar.gz": ("elf", "x64", "lasso-zen-bre", "x86_64-unknown-linux-gnu"),
+    f"lasso-zen-bre-{engine_version}-linux-arm64.tar.gz": ("elf", "arm64", "lasso-zen-bre", "aarch64-unknown-linux-gnu"),
+    f"lasso-zen-bre-{engine_version}-macos-x64.tar.gz": ("macho", "x64", "lasso-zen-bre", "x86_64-apple-darwin"),
+    f"lasso-zen-bre-{engine_version}-macos-arm64.tar.gz": ("macho", "arm64", "lasso-zen-bre", "aarch64-apple-darwin"),
 }
 
 
@@ -63,8 +62,6 @@ def read_archive(path: pathlib.Path) -> tuple[set[str], dict[str, bytes]]:
 def verify_binary(data: bytes, file_format: str, architecture: str, name: str) -> None:
     if engine_version.encode() not in data:
         fail(f"{name} does not embed the pinned engine version")
-    if commit_sha.encode() not in data:
-        fail(f"{name} does not embed the release build identity")
     if file_format == "pe":
         if data[:2] != b"MZ" or len(data) < 64:
             fail(f"{name} is not a PE executable")
@@ -103,9 +100,10 @@ required_archive_files = {
     "NOTICE",
     "THIRD_PARTY_LICENSES/zen-engine-MIT.txt",
     "README.md",
+    "BUILD-IDENTITY.json",
     "decisions/example.json",
 }
-for filename, (file_format, architecture, binary_name) in archives.items():
+for filename, (file_format, architecture, binary_name, target_triple) in archives.items():
     path = assets_dir / filename
     if not path.is_file():
         fail(f"missing release archive: {filename}")
@@ -129,6 +127,15 @@ for filename, (file_format, architecture, binary_name) in archives.items():
         fail(f"{filename} embeds the wrong wrapper version")
     if embedded.get("meta", {}).get("upstream", {}).get("version") != engine_version:
         fail(f"{filename} embeds the wrong engine manifest version")
+    build = json.loads(files["BUILD-IDENTITY.json"])
+    if build != {
+        "service": "zen-bre",
+        "wrapperVersion": "0.1.0",
+        "engineVersion": engine_version,
+        "buildIdentity": commit_sha,
+        "targetTriple": target_triple,
+    }:
+        fail(f"{filename} contains invalid build identity metadata")
 
 service = json.loads((assets_dir / "service.json").read_text())
 source = service.get("artifact", {}).get("source", {})

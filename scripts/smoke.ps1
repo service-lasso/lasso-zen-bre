@@ -38,6 +38,12 @@ try {
     throw 'Packaged readiness response is invalid'
   }
 
+  $version = Invoke-RestMethod -Uri "http://127.0.0.1:$port/version" -TimeoutSec 2
+  $expectedBuild = if ($env:LASSO_ZEN_BRE_BUILD_SHA) { $env:LASSO_ZEN_BRE_BUILD_SHA } else { 'development' }
+  if ($version.buildIdentity -ne $expectedBuild) {
+    throw 'Packaged version response has the wrong build identity'
+  }
+
   $evaluation = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:$port/v1/decisions/example/evaluate" -ContentType 'application/json' -Body '{}'
   if ($evaluation.result.message -ne 'Hello from Service Lasso ZEN BRE') {
     throw 'Packaged decision evaluation is invalid'

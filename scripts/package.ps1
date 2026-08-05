@@ -33,6 +33,7 @@ Copy-Item -Force (Join-Path $root 'NOTICE') (Join-Path $staging 'NOTICE')
 Copy-Item -Force (Join-Path $root 'README.md') (Join-Path $staging 'README.md')
 Copy-Item -Force (Join-Path $root 'THIRD_PARTY_LICENSES\zen-engine-MIT.txt') (Join-Path $staging 'THIRD_PARTY_LICENSES\zen-engine-MIT.txt')
 Copy-Item -Force (Join-Path $root 'examples\decisions\example.json') (Join-Path $staging 'decisions\example.json')
+python .\scripts\write_build_metadata.py (Join-Path $staging 'BUILD-IDENTITY.json') $targetTriple
 
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zipPath
@@ -40,7 +41,7 @@ Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zipPath
 $entries = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
 try {
   $names = @($entries.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-  foreach ($required in @('lasso-zen-bre.exe', 'service.json', 'decisions/example.json')) {
+  foreach ($required in @('lasso-zen-bre.exe', 'service.json', 'BUILD-IDENTITY.json', 'decisions/example.json')) {
     if ($names -notcontains $required) {
       throw "Archive is missing $required"
     }

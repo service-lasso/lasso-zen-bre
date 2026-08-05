@@ -9,4 +9,5 @@
 - add structured no-value logging and stable redacted error envelopes
 - add canonical Service Lasso endpoint, workspace, health and artifact contract
 - add Windows x64, Linux x64/ARM64 and macOS x64/ARM64 release packages
+- add runtime-checked and archive-contained build identity metadata
 - add checksums, CycloneDX SBOM, provenance and post-publication verification
