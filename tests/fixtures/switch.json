@@ -1,0 +1,35 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"switch",
+      "type":"switchNode",
+      "name":"Colour switch",
+      "content":{"statements":[
+        {"id":"yellow","condition":"color == 'yellow'"},
+        {"id":"default","condition":""}
+      ]}
+    },
+    {
+      "id":"yellow-expression",
+      "type":"expressionNode",
+      "name":"Yellow",
+      "content":{"expressions":[{"id":"yellow-result","key":"path1","value":"true"}]}
+    },
+    {
+      "id":"default-expression",
+      "type":"expressionNode",
+      "name":"Default",
+      "content":{"expressions":[{"id":"default-result","key":"path3","value":"true"}]}
+    },
+    {"id":"yellow-output","type":"outputNode","name":"Response"},
+    {"id":"default-output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"switch"},
+    {"id":"edge-2","sourceId":"switch","type":"edge","targetId":"yellow-expression","sourceHandle":"yellow"},
+    {"id":"edge-3","sourceId":"yellow-expression","type":"edge","targetId":"yellow-output"},
+    {"id":"edge-4","sourceId":"switch","type":"edge","targetId":"default-expression","sourceHandle":"default"},
+    {"id":"edge-5","sourceId":"default-expression","type":"edge","targetId":"default-output"}
+  ]
+}

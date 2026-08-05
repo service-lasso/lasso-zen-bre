@@ -1,152 +1,158 @@
-# service-template
+# lasso-zen-bre
 
-_Status: starter template repo_
+`lasso-zen-bre` is a portable, local-first HTTP decision service for Service
+Lasso. It embeds [GoRules ZEN](https://github.com/gorules/zen) through the native
+Rust `zen-engine` crate; a system Rust, Node.js or Python runtime is not needed
+after installation.
 
-`service-template` is the canonical starting point for new Service Lasso service repos.
+The Service Lasso project owns this wrapper, its HTTP/lifecycle contract and its
+release packaging. GoRules owns ZEN, JDM and its separate editor/BRMS products.
 
-Use this repo when you want to create a new service repo that already has:
-- the expected service repo layout
-- a starter `service.json`
-- a starter `services/` inventory example for app/reference repos that embed Service Lasso
-- starter packaging scripts
-- starter verify scripts and harness contract shape
-- starter docs for service contract, packaging, and validation
-- starter CI scaffolding
-- documented GitHub-template-first repo bootstrap flow
-- runtime extension guidance for compiled daemons, Node services, and bootstrap/system services
+## Service contract
 
-## Use this template
+- Service ID: `zen-bre`
+- Display name: `GoRules ZEN Business Rules Engine`
+- Wrapper version: `0.1.0`
+- Embedded engine: `zen-engine = 1.0.0-beta.11`
+- Preferred local endpoint: `127.0.0.1:18089`
+- Default state: disabled until a consuming application opts in
 
-Recommended flow:
+The release workflow publishes:
 
-1. Create the new GitHub repo **through GitHub's template mechanism** from `service-lasso/service-template`.
-   - GitHub UI: click **Use this template** on this repo.
-   - GitHub CLI: `gh repo create service-lasso/<repo-name> --public --template service-lasso/service-template`.
-2. Verify GitHub recorded the origin:
+| Target | Release asset | Service Lasso selector |
+| --- | --- | --- |
+| Windows x64 MSVC | `lasso-zen-bre-1.0.0-beta.11-windows-x64.zip` | `win32` |
+| Linux x64 GNU | `lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz` | `linux` |
+| Linux ARM64 GNU | `lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz` | supplemental |
+| macOS x64 | `lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz` | supplemental |
+| macOS ARM64 | `lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz` | `darwin` |
 
-   ```powershell
-   gh api repos/service-lasso/<repo-name> --jq '.template_repository.full_name'
-   # must print: service-lasso/service-template
-   ```
+Service Lasso currently selects artifacts by `process.platform`, not CPU
+architecture. The manifest therefore selects Windows x64, Linux x64 and macOS
+ARM64 as its primary install targets. Linux ARM64 and macOS x64 are still built,
+tested and published for explicit acquisition until architecture-aware artifact
+selection lands in core.
 
-3. Clone the new GitHub-created repo locally.
-4. Rename the sample service files/content for the real service.
-5. Replace the sample runtime payload with the real service payload.
-6. Update `service.json`, `verify/service-harness.json`, workflows, package/test/verify scripts, and docs for the new service.
-7. Run the local package + test flow.
-8. Open a focused PR and wait for `validate-template` to pass on Windows/Linux/macOS.
+Each release also contains the exact pinned release `service.json`,
+`SHA256SUMS.txt`, `SBOM.cdx.json` and GitHub build-provenance attestations.
 
-Do **not** start from a local copy or another service repo and retrofit the template later. File parity is not enough; the GitHub repo itself must show it was generated from `service-lasso/service-template`.
+## HTTP API
 
-See `docs/bootstrap-new-service-repo.md` for the full GitHub-template-first checklist and remediation process for incorrectly-created repos.
+- `GET /health/live` reports process/event-loop liveness.
+- `GET /health/ready` is healthy only when every discovered model parses and
+  compiles.
+- `GET /version` reports wrapper, engine and build identity.
+- `GET /v1/decisions` returns decision IDs and validation status only.
+- `POST /v1/decisions/{id}/evaluate` evaluates a JSON context.
+- `POST /v1/decisions/reload` atomically rescans and compiles the workspace.
 
-## Quick start
+Example:
 
-### Local package
-
-```powershell
-pwsh -NoLogo -NoProfile -File .\scripts\package.ps1
+```bash
+curl --fail http://127.0.0.1:18089/health/ready
+curl --fail \
+  -H 'content-type: application/json' \
+  --data '{"customer":{"tier":"gold"}}' \
+  http://127.0.0.1:18089/v1/decisions/pricing/evaluate
 ```
 
-### Local tests
+Evaluation responses contain `decisionId`, `result` and a correlation ID. Error
+responses use a stable bounded envelope and do not return JDM source, host paths
+or input/output values.
 
-```powershell
-pwsh -NoLogo -NoProfile -File .\scripts\test.ps1
+## Decision workspace
+
+Put JDM JSON files under `decisions/`. A file such as
+`decisions/commercial/pricing.json` is exposed as decision ID
+`commercial/pricing`; nested Decision nodes continue to resolve the loader key
+`commercial/pricing.json` within the same compiled registry.
+
+Reload is transactional. A new registry is parsed and compiled away from live
+traffic, then swapped in one operation. If any file is invalid, readiness stays
+healthy on the last valid registry and the new registry is rejected with bounded
+diagnostics. An invalid registry at process startup leaves liveness healthy and
+readiness unhealthy.
+
+The archive includes one non-production `decisions/example.json` model so a new
+installation can be tested immediately. Releases never include operator models,
+logs or generated state.
+
+Service-owned paths are relocatable beneath `SERVICE_ROOT`:
+
+- `decisions/` is the operator-managed read/write JDM workspace.
+- `config/` is generated non-secret configuration.
+- `logs/` is runtime logging output.
+- `.state/registry.json` contains only generation, count, timestamp and engine
+  version metadata.
+
+Traversal, symbolic links, non-JSON files, invalid IDs and paths outside
+`SERVICE_ROOT` are rejected.
+
+## Security and limits
+
+The default configuration:
+
+- binds to loopback only;
+- disables outbound ZEN HTTP adapters;
+- retains ZEN's QuickJS execution boundary and sets its function timeout to the
+  service evaluation timeout;
+- disables evaluation traces;
+- limits request bytes, JSON nesting, model bytes, total registry bytes, model
+  count, evaluation depth and concurrent evaluations;
+- logs correlation ID, decision ID, duration and outcome class only.
+
+| Environment variable | Default |
+| --- | ---: |
+| `ZEN_BRE_MAX_BODY_BYTES` | `1048576` |
+| `ZEN_BRE_MAX_MODEL_BYTES` | `4194304` |
+| `ZEN_BRE_MAX_TOTAL_MODEL_BYTES` | `67108864` |
+| `ZEN_BRE_MAX_MODELS` | `1000` |
+| `ZEN_BRE_MAX_CONCURRENCY` | `32` |
+| `ZEN_BRE_EVALUATION_TIMEOUT_MS` | `5000` |
+| `ZEN_BRE_MAX_DEPTH` | `10` |
+| `ZEN_BRE_MAX_JSON_DEPTH` | `64` |
+
+Non-loopback binding requires the explicit `--allow-non-loopback` option. The
+initial service does not provide authentication or TLS, so applications should
+keep it local or place an authenticated local proxy in front of it.
+
+## Local development
+
+```bash
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
+bash ./scripts/package.sh
+bash ./scripts/smoke.sh
 ```
 
-## Start here for deeper design context
+```powershell
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
+.\scripts\package.ps1
+.\scripts\smoke.ps1
+```
 
-Read in this order if you need the underlying design/spec context:
+Run from source:
 
-1. `docs/openspec-drafts/SPEC-SERVICE-TEMPLATE-REPO.md`
-2. `docs/openspec-drafts/OPENSPEC-TRACKER.md`
-3. `docs/service-contract.md`
-4. `docs/service-json-reference.md`
-5. `docs/packaging.md`
-6. `docs/validation.md`
-7. `docs/bootstrap-new-service-repo.md`
-8. `docs/runtime-extension-points.md`
-9. `docs/reference/adjacent/SPEC-SERVICE-LASSO-HARNESS.md`
+```bash
+cargo run -- \
+  --service-root "$PWD/runtime" \
+  --host 127.0.0.1 \
+  --port 18089 \
+  --decisions-dir "$PWD/runtime/decisions"
+```
 
-## What is here
+## Upgrades and rollback
 
-### OpenSpec drafts
-- `docs/openspec-drafts/SPEC-SERVICE-TEMPLATE-REPO.md`
-- `docs/openspec-drafts/OPENSPEC-TRACKER.md`
+`zen-engine` is locked at build time and never floats at runtime. Advancing a
+beta engine version requires the full fixture suite, precision regression,
+native package smoke tests, Service Lasso harness gates and release-asset
+verification. A consuming application should pin the released `service.json`
+and retain its previous archive/tag so Service Lasso rollback can restore the
+last verified package.
 
-### Supporting reference/planning docs
-- `docs/service-contract.md`
-- `docs/service-json-reference.md`
-- `docs/packaging.md`
-- `docs/validation.md`
-- `docs/reference/SERVICE-TEMPLATE-REPO.md`
-- `docs/reference/SERVICE-STRUCTURE-REVIEW.md`
-- `docs/reference/PROPOSED-CODEBASE-STRUCTURE.md`
-- `docs/reference/DECISION-CONTEXT.md`
-- `docs/reference/shared-runtime/QUESTION-LIST-AND-CODE-VALIDATION.md`
-- `docs/reference/shared-runtime/ARCHITECTURE-DECISIONS.md`
-- `docs/reference/shared-runtime/SERVICE-MANAGER-BEHAVIOR.md`
-- `docs/reference/adjacent/SPEC-SERVICE-LASSO-HARNESS.md`
-- `docs/reference/EXAMPLE-REPO-TREE.md`
-- `docs/reference/EXAMPLE-service.json`
-- `docs/reference/EXAMPLE-service-harness.json`
-- `docs/reference/EXAMPLE-verify.ps1`
-- `docs/reference/EXAMPLE-verify.sh`
-
-## Purpose
-
-This repo is the canonical starting point for Service Lasso service repos.
-
-Its role is to define:
-- one-service-per-repo expectations
-- service repo layout
-- service author documentation expectations
-- sample service expectations
-- packaging/release expectations
-- validation-harness integration expectations
-
-## Current status
-
-This repo is usable now as a starter template.
-
-It currently includes:
-- actual starter repo files (`service.json`, `verify/`, `scripts/`, `runtime/`, `config/`, `.github/workflows/`)
-- a tracked example `services/` inventory for downstream app/reference repos
-- a packaged first-pass sample artifact at `dist/echo-service-win32.zip`
-- a starter multi-OS GitHub Actions workflow that packages release archives and runs basic tests
-- starter harness-contract files and thin verify wrappers
-- supporting reference/spec docs for deeper design work
-
-Important current validation note:
-- the pipeline now downloads and invokes the released `service-lasso-harness` binary in CI
-- it still keeps the starter local package/test flow alongside harness verification
-- the current harness version is pinned in workflow config and can be advanced intentionally over time
-
-Important current manifest note:
-- the bounded first-pass core runtime now expects service release/install metadata to live directly in `service.json`
-- the current template example uses a bounded `artifact.kind`, `artifact.source`, and `artifact.platforms` shape to show that direction explicitly
-- bundled app artifacts mean the app package step has already acquired service archives into `services/<service-id>/.state/artifacts/<tag>/<assetName>` so first run can install without downloading those archives
-
-## Baseline app inventory rule
-
-This repo still models the canonical one-service-per-repo contract through the root `service.json`.
-
-In addition, it now carries a tracked example `services/` inventory to show what app/reference repos should own when they embed Service Lasso.
-
-Current baseline inventory:
-- `services/echo-service/service.json`
-- `services/@serviceadmin/service.json`
-- `services/@node/service.json`
-- `services/@localcert/service.json`
-- `services/@nginx/service.json`
-- `services/@traefik/service.json`
-
-Optional provider inventory:
-- `services/@python/service.json` disabled release-backed Python 3.11.5 provider; Windows artifact only
-- `services/@java/service.json` disabled release-backed Java 17 provider
-
-Important rule:
-- app/reference repos should own the exact `services/` manifests for the services they intend to manage
-- if an app repo includes `@serviceadmin`, it should also include the manifests needed to satisfy Service Admin's declared service dependencies
-- core Service Lasso services use the `@` prefix: `@node`, `@python`, `@java`, `@localcert`, `@nginx`, `@traefik`, `@serviceadmin`, and `@secretsbroker`; `echo-service` stays unprefixed because it is the sample/test managed service
-- environment settings like `VITE_SERVICE_LASSO_API_BASE_URL` still belong in app/runtime config, not as extra service manifests
+The repository's development manifest tracks the latest release for maintainer
+testing. The `service.json` attached to each release is rewritten and verified
+as a self-contained manifest pinned to that exact release tag.

@@ -1,0 +1,19 @@
+{
+  "contentType": "application/vnd.gorules.decision",
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"expression",
+      "type":"expressionNode",
+      "name":"Greeting",
+      "content":{"expressions":[
+        {"id":"message","key":"message","value":"'Hello from Service Lasso ZEN BRE'"}
+      ]}
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"expression"},
+    {"id":"edge-2","sourceId":"expression","type":"edge","targetId":"output"}
+  ]
+}

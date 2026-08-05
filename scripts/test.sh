@@ -4,74 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-for path in \
-  "$ROOT/service.json" \
-  "$ROOT/verify/service-harness.json"; do
-  if [[ ! -f "$path" ]]; then
-    echo "Missing required file: $path" >&2
-    exit 1
-  fi
-done
+python3 ./scripts/validate_repository.py
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
 
-SERVICE_ID=$(python3 - <<'PY'
-import json, pathlib
-path = pathlib.Path('service.json')
-print(json.loads(path.read_text())['id'])
-PY
-)
-if [[ "$SERVICE_ID" != "echo-service" ]]; then
-  echo "service.json id mismatch" >&2
-  exit 1
-fi
-
-python3 - <<'PY'
-import json
-import pathlib
-
-paths = [pathlib.Path('service.json')]
-services_root = pathlib.Path('services')
-if services_root.exists():
-    paths.extend(sorted(services_root.glob('**/service.json')))
-
-for path in paths:
-    doc = json.loads(path.read_text())
-    if 'healthcheck' in doc:
-        raise SystemExit(f"Singular healthcheck is not allowed in {path}; use healthchecks[].")
-    execconfig = doc.get('execconfig')
-    if isinstance(execconfig, dict) and 'healthcheck' in execconfig:
-        raise SystemExit(f"execconfig.healthcheck is not allowed in {path}; use top-level healthchecks[].")
-    if 'healthchecks' in doc:
-        checks = doc['healthchecks']
-        if not isinstance(checks, list):
-            raise SystemExit(f"healthchecks must be an array in {path}.")
-        for check in checks:
-            if not isinstance(check, dict) or not check.get('id'):
-                raise SystemExit(f"Every healthchecks[] item needs a stable id in {path}.")
-PY
-
-CONTRACT_ID=$(python3 - <<'PY'
-import json, pathlib
-path = pathlib.Path('verify/service-harness.json')
-print(json.loads(path.read_text())['serviceId'])
-PY
-)
-if [[ "$CONTRACT_ID" != "echo-service" ]]; then
-  echo "service-harness.json serviceId mismatch" >&2
-  exit 1
-fi
-
-OS_NAME=$(uname -s)
-case "$OS_NAME" in
-  Linux*) RUNTIME="$ROOT/runtime/linux/echo-service.sh" ;;
-  Darwin*) RUNTIME="$ROOT/runtime/darwin/echo-service.sh" ;;
-  *) echo "Unsupported OS for test.sh: $OS_NAME" >&2; exit 1 ;;
-esac
-
-chmod +x "$RUNTIME"
-OUTPUT=$(ECHO_MESSAGE='pipeline test message' "$RUNTIME")
-if [[ "$OUTPUT" != *"pipeline test message"* ]]; then
-  echo "Echo runtime output mismatch" >&2
-  exit 1
-fi
-
-echo "Template tests passed ($OS_NAME)"
+echo "lasso-zen-bre tests passed ($(uname -s))"

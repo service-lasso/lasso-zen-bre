@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"expression",
+      "type":"expressionNode",
+      "name":"Precision",
+      "content":{"expressions":[
+        {"id":"precise","key":"precise","value":"12345678901234567890.12345678 + 0.00000001"}
+      ]}
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"expression"},
+    {"id":"edge-2","sourceId":"expression","type":"edge","targetId":"output"}
+  ]
+}

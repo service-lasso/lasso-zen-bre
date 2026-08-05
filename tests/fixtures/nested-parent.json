@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {"id":"nested","type":"decisionNode","name":"Child","content":{"key":"child.json"}},
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"nested"},
+    {"id":"edge-2","sourceId":"nested","type":"edge","targetId":"output"}
+  ]
+}

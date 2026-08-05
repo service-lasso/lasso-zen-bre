@@ -34,7 +34,7 @@ $resolvedContractPath = Join-Path $root 'verify\service-harness.ci.json'
 $runOutputDir = Join-Path $outputPath 'harness-run'
 
 $doc = Get-Content $contractPath -Raw | ConvertFrom-Json
-$doc.artifact.path = '..\dist\echo-service-win32.zip'
+$doc.artifact.path = '..\dist\lasso-zen-bre-1.0.0-beta.11-windows-x64.zip'
 $doc | ConvertTo-Json -Depth 10 | Set-Content $resolvedContractPath
 
 $harness = Resolve-HarnessBinary

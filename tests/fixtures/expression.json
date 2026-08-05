@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    {"id":"input","type":"inputNode","name":"Request"},
+    {
+      "id":"expression",
+      "type":"expressionNode",
+      "name":"Expression",
+      "content":{"expressions":[
+        {"id":"sum","key":"sum","value":"sum(numbers)"},
+        {"id":"name","key":"fullName","value":"firstName + ' ' + lastName"}
+      ]}
+    },
+    {"id":"output","type":"outputNode","name":"Response"}
+  ],
+  "edges": [
+    {"id":"edge-1","sourceId":"input","type":"edge","targetId":"expression"},
+    {"id":"edge-2","sourceId":"expression","type":"edge","targetId":"output"}
+  ]
+}
