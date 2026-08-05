@@ -50,6 +50,11 @@ assert that `/version` reports the same full commit SHA before publication.
 - `POST /v1/decisions/{id}/evaluate` evaluates a JSON context.
 - `POST /v1/decisions/reload` atomically rescans and compiles the workspace.
 
+Install, configuration, start, stop, restart, update and rollback use Service
+Lasso's standard lifecycle operations. The manifest does not redeclare them as
+custom actions. Decision validation and reload remain bounded service APIs until
+core provides a compatible handler-backed custom-action contract.
+
 Example:
 
 ```bash

@@ -44,6 +44,8 @@ for relative in required:
 service = json.loads((ROOT / "service.json").read_text())
 if service.get("id") != "zen-bre" or service.get("enabled") is not False:
     fail("service identity or disabled-by-default policy is invalid")
+if "actions" in service:
+    fail("custom actions must use the current Service Lasso action contract; standard lifecycle operations are core-owned")
 if service.get("version") != "0.1.0":
     fail("wrapper version is not 0.1.0")
 upstream = service.get("meta", {}).get("upstream", {})

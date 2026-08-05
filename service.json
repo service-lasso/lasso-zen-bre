@@ -192,53 +192,6 @@
       }
     }
   },
-  "actions": {
-    "install": {
-      "description": "Acquire and verify the packaged ZEN BRE runtime artifact.",
-      "mode": "converge-install",
-      "idempotent": true
-    },
-    "config": {
-      "description": "Materialise the bounded decisions, config, logs and state workspace.",
-      "mode": "converge-config",
-      "idempotent": true
-    },
-    "validate": {
-      "description": "Parse and compile the decision registry without exposing decision source or values.",
-      "mode": "runtime-validate",
-      "idempotent": true
-    },
-    "reload": {
-      "description": "Atomically rescan and compile decision files.",
-      "mode": "runtime-reload",
-      "idempotent": false
-    },
-    "update": {
-      "description": "Acquire a newer verified release and reconcile it before restart.",
-      "mode": "converge-update",
-      "idempotent": true
-    },
-    "start": {
-      "description": "Start the ZEN BRE HTTP service.",
-      "mode": "runtime-start",
-      "idempotent": true
-    },
-    "stop": {
-      "description": "Stop the ZEN BRE HTTP service gracefully.",
-      "mode": "runtime-stop",
-      "idempotent": true
-    },
-    "restart": {
-      "description": "Restart ZEN BRE after configuration, decision or artifact changes.",
-      "mode": "runtime-restart",
-      "idempotent": false
-    },
-    "rollback": {
-      "description": "Restore the previously verified artifact after a failed update.",
-      "mode": "state-rollback",
-      "idempotent": false
-    }
-  },
   "execconfig": {
     "debuglog": true,
     "serviceorder": 100
