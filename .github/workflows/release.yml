@@ -198,7 +198,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Download packaged artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release-assets
           pattern: lasso-zen-bre-*
