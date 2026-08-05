@@ -216,6 +216,10 @@ jobs:
         shell: bash
         run: python3 ./scripts/prepare_release.py service.json "${{ steps.version.outputs.value }}" release-assets/service.json
 
+      - name: Pin manifest inside platform archives
+        shell: bash
+        run: python3 ./scripts/pin_archive_manifests.py release-assets release-assets/service.json
+
       - name: Generate CycloneDX SBOM
         shell: bash
         run: python3 ./scripts/generate_sbom.py release-assets/SBOM.cdx.json

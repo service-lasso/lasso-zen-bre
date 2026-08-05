@@ -34,6 +34,7 @@ required = [
     "NOTICE",
     "THIRD_PARTY_LICENSES/zen-engine-MIT.txt",
     "scripts/write_build_metadata.py",
+    "scripts/pin_archive_manifests.py",
     "README.md",
 ]
 for relative in required:
@@ -119,6 +120,8 @@ for asset in ALL_ASSETS:
 for required_release_output in ("SHA256SUMS.txt", "SBOM.cdx.json", "attest-build-provenance"):
     if required_release_output not in release:
         fail(f"release workflow is missing {required_release_output}")
+if "pin_archive_manifests.py" not in release:
+    fail("release workflow does not pin service.json inside platform archives")
 
 for package_script in ("scripts/package.sh", "scripts/package.ps1"):
     if "BUILD-IDENTITY.json" not in (ROOT / package_script).read_text():
