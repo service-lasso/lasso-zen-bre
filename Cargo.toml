@@ -13,7 +13,7 @@ serde_json = { version = "1", features = ["arbitrary_precision"] }
 tokio = { version = "1", features = ["macros", "net", "rt", "rt-multi-thread", "signal", "sync", "time"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
-zen-engine = { version = "=1.0.0-beta.11", features = ["arbitrary_precision"] }
+zen-engine = { version = "=1.0.0-beta.12", features = ["arbitrary_precision"] }
 
 [dev-dependencies]
 http-body-util = "0.1"
