@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$archive = Join-Path $root 'dist\lasso-zen-bre-1.0.0-beta.11-windows-x64.zip'
+$archive = Join-Path $root 'dist\lasso-zen-bre-1.0.0-beta.12-windows-x64.zip'
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("lasso-zen-bre-" + [guid]::NewGuid().ToString('N'))
 $process = $null
 
@@ -34,7 +34,7 @@ try {
       Start-Sleep -Milliseconds 250
     }
   }
-  if ($null -eq $ready -or $ready.status -ne 'ready' -or $ready.engineVersion -ne '1.0.0-beta.11') {
+  if ($null -eq $ready -or $ready.status -ne 'ready' -or $ready.engineVersion -ne '1.0.0-beta.12') {
     throw 'Packaged readiness response is invalid'
   }
 

@@ -13,7 +13,7 @@ release packaging. GoRules owns ZEN, JDM and its separate editor/BRMS products.
 - Service ID: `zen-bre`
 - Display name: `GoRules ZEN Business Rules Engine`
 - Wrapper version: `0.1.0`
-- Embedded engine: `zen-engine = 1.0.0-beta.11`
+- Embedded engine: `zen-engine = 1.0.0-beta.12`
 - Preferred local endpoint: `127.0.0.1:18089`
 - Default state: disabled until a consuming application opts in
 
@@ -21,11 +21,11 @@ The release workflow publishes:
 
 | Target | Release asset | Service Lasso selector |
 | --- | --- | --- |
-| Windows x64 MSVC | `lasso-zen-bre-1.0.0-beta.11-windows-x64.zip` | `win32` |
-| Linux x64 GNU | `lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz` | `linux` |
-| Linux ARM64 GNU | `lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz` | supplemental |
-| macOS x64 | `lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz` | supplemental |
-| macOS ARM64 | `lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz` | `darwin` |
+| Windows x64 MSVC | `lasso-zen-bre-1.0.0-beta.12-windows-x64.zip` | `win32` |
+| Linux x64 GNU | `lasso-zen-bre-1.0.0-beta.12-linux-x64.tar.gz` | `linux` |
+| Linux ARM64 GNU | `lasso-zen-bre-1.0.0-beta.12-linux-arm64.tar.gz` | supplemental |
+| macOS x64 | `lasso-zen-bre-1.0.0-beta.12-macos-x64.tar.gz` | supplemental |
+| macOS ARM64 | `lasso-zen-bre-1.0.0-beta.12-macos-arm64.tar.gz` | `darwin` |
 
 Service Lasso currently selects artifacts by `process.platform`, not CPU
 architecture. The manifest therefore selects Windows x64, Linux x64 and macOS

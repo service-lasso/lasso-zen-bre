@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-ENGINE_VERSION="1.0.0-beta.11"
+ENGINE_VERSION="1.0.0-beta.12"
 HOST_TRIPLE="$(rustc -vV | sed -n 's/^host: //p')"
 TARGET_TRIPLE="${TARGET_TRIPLE:-$HOST_TRIPLE}"
 
