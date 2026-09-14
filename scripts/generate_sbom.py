@@ -46,7 +46,7 @@ document = {
             "purl": "pkg:github/service-lasso/lasso-zen-bre@0.1.0",
         },
         "properties": [
-            {"name": "service-lasso:embedded-engine", "value": "zen-engine@1.0.0-beta.11"},
+            {"name": "service-lasso:embedded-engine", "value": "zen-engine@1.0.0-beta.12"},
             {"name": "service-lasso:arbitrary-precision", "value": "true"},
         ],
     },

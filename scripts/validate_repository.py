@@ -5,7 +5,7 @@ import re
 
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ENGINE_VERSION = "1.0.0-beta.11"
+ENGINE_VERSION = "1.0.0-beta.12"
 PRIMARY_ASSETS = {
     "win32": f"lasso-zen-bre-{ENGINE_VERSION}-windows-x64.zip",
     "linux": f"lasso-zen-bre-{ENGINE_VERSION}-linux-x64.tar.gz",
@@ -104,7 +104,7 @@ for platform, asset in PRIMARY_ASSETS.items():
         fail(f"checksum contract mismatch for {platform}")
 
 cargo = (ROOT / "Cargo.toml").read_text()
-expected = r'zen-engine = \{ version = "=1\.0\.0-beta\.11", features = \["arbitrary_precision"\] \}'
+expected = r'zen-engine = \{ version = "=1\.0\.0-beta\.12", features = \["arbitrary_precision"\] \}'
 if not re.search(expected, cargo):
     fail("Cargo.toml must pin zen-engine with arbitrary_precision")
 lock = (ROOT / "Cargo.lock").read_text()

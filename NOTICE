@@ -5,7 +5,7 @@ This product includes a Service Lasso-owned wrapper for the GoRules ZEN engine.
 GoRules ZEN
 - Repository: https://github.com/gorules/zen
 - Rust crate: zen-engine
-- Pinned version: 1.0.0-beta.11
+- Pinned version: 1.0.0-beta.12
 - License: MIT
 
 The Service Lasso wrapper and packaging are licensed under this repository's

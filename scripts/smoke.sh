@@ -14,7 +14,7 @@ case "$TARGET_TRIPLE" in
   *) echo "Unsupported smoke target: $TARGET_TRIPLE" >&2; exit 1 ;;
 esac
 ASSET_PLATFORM_VALUE="${ASSET_PLATFORM:-$ASSET_PLATFORM_VALUE}"
-ARCHIVE="$ROOT/dist/lasso-zen-bre-1.0.0-beta.11-$ASSET_PLATFORM_VALUE.tar.gz"
+ARCHIVE="$ROOT/dist/lasso-zen-bre-1.0.0-beta.12-$ASSET_PLATFORM_VALUE.tar.gz"
 TEMP_DIR="$(mktemp -d)"
 PROCESS_ID=""
 
@@ -67,7 +67,7 @@ import sys
 ready = json.loads(pathlib.Path(sys.argv[1]).read_text())
 evaluation = json.loads(pathlib.Path(sys.argv[2]).read_text())
 version = json.loads(pathlib.Path(sys.argv[3]).read_text())
-if ready.get('status') != 'ready' or ready.get('engineVersion') != '1.0.0-beta.11':
+if ready.get('status') != 'ready' or ready.get('engineVersion') != '1.0.0-beta.12':
     raise SystemExit('packaged readiness response is invalid')
 if evaluation.get('result', {}).get('message') != 'Hello from Service Lasso ZEN BRE':
     raise SystemExit('packaged decision evaluation is invalid')

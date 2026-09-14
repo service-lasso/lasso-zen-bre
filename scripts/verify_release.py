@@ -14,7 +14,7 @@ if len(sys.argv) != 4:
 assets_dir = pathlib.Path(sys.argv[1])
 release_tag = sys.argv[2]
 commit_sha = sys.argv[3]
-engine_version = "1.0.0-beta.11"
+engine_version = "1.0.0-beta.12"
 archives = {
     f"lasso-zen-bre-{engine_version}-windows-x64.zip": ("pe", "x64", "lasso-zen-bre.exe", "x86_64-pc-windows-msvc"),
     f"lasso-zen-bre-{engine_version}-linux-x64.tar.gz": ("elf", "x64", "lasso-zen-bre", "x86_64-unknown-linux-gnu"),

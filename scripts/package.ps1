@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$engineVersion = '1.0.0-beta.11'
+$engineVersion = '1.0.0-beta.12'
 $targetTriple = if ($env:TARGET_TRIPLE) { $env:TARGET_TRIPLE } else { 'x86_64-pc-windows-msvc' }
 $assetPlatform = if ($env:ASSET_PLATFORM) { $env:ASSET_PLATFORM } else { 'windows-x64' }
 if ($targetTriple -ne 'x86_64-pc-windows-msvc' -or $assetPlatform -ne 'windows-x64') {

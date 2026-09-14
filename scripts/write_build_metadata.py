@@ -16,7 +16,7 @@ if build_identity != "development" and not re.fullmatch(r"[0-9a-f]{40}", build_i
 document = {
     "service": "zen-bre",
     "wrapperVersion": "0.1.0",
-    "engineVersion": "1.0.0-beta.11",
+    "engineVersion": "1.0.0-beta.12",
     "buildIdentity": build_identity,
     "targetTriple": sys.argv[2],
 }
