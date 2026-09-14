@@ -2,7 +2,7 @@
 
 ## 0.1.0
 
-- embed `zen-engine` 1.0.0-beta.11 with arbitrary precision enabled
+- embed `zen-engine` 1.0.0-beta.12 with arbitrary precision enabled
 - add file-backed compiled decision registry and nested Decision-node loading
 - add live, ready, version, inventory, evaluate and atomic reload APIs
 - add bounded request, model, concurrency, timeout and depth controls

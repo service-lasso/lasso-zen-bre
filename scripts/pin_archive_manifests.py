@@ -16,7 +16,7 @@ if len(sys.argv) != 3:
 assets_dir = pathlib.Path(sys.argv[1])
 manifest_path = pathlib.Path(sys.argv[2])
 manifest = manifest_path.read_bytes()
-engine_version = "1.0.0-beta.11"
+engine_version = "1.0.0-beta.12"
 archives = [
     f"lasso-zen-bre-{engine_version}-windows-x64.zip",
     f"lasso-zen-bre-{engine_version}-linux-x64.tar.gz",

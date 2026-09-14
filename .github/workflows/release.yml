@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  ENGINE_VERSION: 1.0.0-beta.11
+  ENGINE_VERSION: 1.0.0-beta.12
   LASSO_ZEN_BRE_BUILD_SHA: ${{ github.sha }}
   SERVICE_LASSO_HARNESS_REPO: service-lasso/service-lasso-harness
   SERVICE_LASSO_HARNESS_VERSION: v0.1.1
@@ -32,35 +32,35 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             asset_platform: windows-x64
-            archive: dist/lasso-zen-bre-1.0.0-beta.11-windows-x64.zip
+            archive: dist/lasso-zen-bre-1.0.0-beta.12-windows-x64.zip
             harness_archive: service-lasso-harness-windows-amd64.zip
             harness_binary: service-lasso-harness.exe
             harness_platform: win32
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             asset_platform: linux-x64
-            archive: dist/lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz
+            archive: dist/lasso-zen-bre-1.0.0-beta.12-linux-x64.tar.gz
             harness_archive: service-lasso-harness-linux-amd64.tar.gz
             harness_binary: service-lasso-harness
             harness_platform: linux
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
             asset_platform: linux-arm64
-            archive: dist/lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz
+            archive: dist/lasso-zen-bre-1.0.0-beta.12-linux-arm64.tar.gz
             harness_archive: ""
             harness_binary: ""
             harness_platform: ""
           - os: macos-15-intel
             target: x86_64-apple-darwin
             asset_platform: macos-x64
-            archive: dist/lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz
+            archive: dist/lasso-zen-bre-1.0.0-beta.12-macos-x64.tar.gz
             harness_archive: ""
             harness_binary: ""
             harness_platform: ""
           - os: macos-15
             target: aarch64-apple-darwin
             asset_platform: macos-arm64
-            archive: dist/lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz
+            archive: dist/lasso-zen-bre-1.0.0-beta.12-macos-arm64.tar.gz
             harness_archive: service-lasso-harness-darwin-arm64.tar.gz
             harness_binary: service-lasso-harness
             harness_platform: darwin
@@ -230,11 +230,11 @@ jobs:
           set -euo pipefail
           cd release-assets
           sha256sum \
-            lasso-zen-bre-1.0.0-beta.11-windows-x64.zip \
-            lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz \
-            lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz \
-            lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz \
-            lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.12-windows-x64.zip \
+            lasso-zen-bre-1.0.0-beta.12-linux-x64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.12-linux-arm64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.12-macos-x64.tar.gz \
+            lasso-zen-bre-1.0.0-beta.12-macos-arm64.tar.gz \
             service.json \
             SBOM.cdx.json > SHA256SUMS.txt
 
@@ -257,11 +257,11 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            release-assets/lasso-zen-bre-1.0.0-beta.11-windows-x64.zip
-            release-assets/lasso-zen-bre-1.0.0-beta.11-linux-x64.tar.gz
-            release-assets/lasso-zen-bre-1.0.0-beta.11-linux-arm64.tar.gz
-            release-assets/lasso-zen-bre-1.0.0-beta.11-macos-x64.tar.gz
-            release-assets/lasso-zen-bre-1.0.0-beta.11-macos-arm64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.12-windows-x64.zip
+            release-assets/lasso-zen-bre-1.0.0-beta.12-linux-x64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.12-linux-arm64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.12-macos-x64.tar.gz
+            release-assets/lasso-zen-bre-1.0.0-beta.12-macos-arm64.tar.gz
             release-assets/service.json
             release-assets/SHA256SUMS.txt
             release-assets/SBOM.cdx.json

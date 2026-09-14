@@ -38,7 +38,7 @@ case "$OS_NAME" in
   *) echo "Unsupported OS for verify.sh: $OS_NAME" >&2; exit 1 ;;
 esac
 ASSET_PLATFORM_VALUE="${ASSET_PLATFORM:-$ASSET_PLATFORM_VALUE}"
-ARTIFACT_PATH="../dist/lasso-zen-bre-1.0.0-beta.11-$ASSET_PLATFORM_VALUE.tar.gz"
+ARTIFACT_PATH="../dist/lasso-zen-bre-1.0.0-beta.12-$ASSET_PLATFORM_VALUE.tar.gz"
 
 python3 - "$CONTRACT" "$RESOLVED_CONTRACT" "$ARTIFACT_PATH" <<'PY'
 import json
