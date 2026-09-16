@@ -4707,9 +4707,9 @@ dependencies = [
 
 [[package]]
 name = "zen-engine"
-version = "1.0.0-beta.12"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b42e892493f3f94f006016a762351ba787374c7e9e24910b92a205b8952b9c72"
+checksum = "2d496ee90df7dbdf57dc50f9a7151af59b02a94d2c14f7fe95ed47f84d9d0191"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4750,9 +4750,9 @@ dependencies = [
 
 [[package]]
 name = "zen-expression"
-version = "1.0.0-beta.12"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aa87c8ca984fa8f8fbd70b79e06b10eb9c1e6d372e5e41e46efd732820d5232"
+checksum = "54ebfe9b20edcb22c243efd3486e6e4ad09683da9cd9f83d198d79a2f63c618c"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4781,9 +4781,9 @@ dependencies = [
 
 [[package]]
 name = "zen-macros"
-version = "1.0.0-beta.12"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40898fbd04392fd53454ab4721537a46c871b3b51528dc1e9323d7db0e66c817"
+checksum = "d316b73632e248999b1dada562b3c2392df3559ddbc710a79dd287c82a596097"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4793,9 +4793,9 @@ dependencies = [
 
 [[package]]
 name = "zen-tmpl"
-version = "1.0.0-beta.12"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "630039a5e138a633e492f58d2d470aede30589753336dac36845e8e078f9dc94"
+checksum = "6a7c3198884e67e5bb09b26db57ddca98512930a30d54dc768b12f80f6651fa7"
 dependencies = [
  "serde",
  "serde_json",
@@ -4805,9 +4805,9 @@ dependencies = [
 
 [[package]]
 name = "zen-types"
-version = "1.0.0-beta.12"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "268b89744b581ef2e9df4c08adc0e03987dccf870086b8b72610265fd85ae602"
+checksum = "8853dc6a80505b7096dae2a171b8a6a22ccb34a251dcec5d54ded2ce1c892883"
 dependencies = [
  "ahash 0.8.12",
  "hipstr",
