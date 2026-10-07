@@ -4048,9 +4048,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.53.1"
+version = "1.53.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+checksum = "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
 dependencies = [
  "bytes",
  "libc",
@@ -4707,9 +4707,9 @@ dependencies = [
 
 [[package]]
 name = "zen-engine"
-version = "2.0.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d496ee90df7dbdf57dc50f9a7151af59b02a94d2c14f7fe95ed47f84d9d0191"
+checksum = "aee7f2b0d1d9ecbcbb6a5e97b720597e23b391052f01fbcd9bad70dbae84336e"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4750,9 +4750,9 @@ dependencies = [
 
 [[package]]
 name = "zen-expression"
-version = "2.0.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54ebfe9b20edcb22c243efd3486e6e4ad09683da9cd9f83d198d79a2f63c618c"
+checksum = "5f744c9d463bc8f8666bc9948d3776e0308ad1c3691607b62051684471b85b8f"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4781,9 +4781,9 @@ dependencies = [
 
 [[package]]
 name = "zen-macros"
-version = "2.0.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d316b73632e248999b1dada562b3c2392df3559ddbc710a79dd287c82a596097"
+checksum = "21d180d2c43d0fc0b5ed75463615ebd6b842c1282505f158096f8e5b17f66489"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4793,9 +4793,9 @@ dependencies = [
 
 [[package]]
 name = "zen-tmpl"
-version = "2.0.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a7c3198884e67e5bb09b26db57ddca98512930a30d54dc768b12f80f6651fa7"
+checksum = "3ae6d0c522420b75fefb15edd58f7096c01a5bc568538ecd72db48a1b74f8670"
 dependencies = [
  "serde",
  "serde_json",
@@ -4805,9 +4805,9 @@ dependencies = [
 
 [[package]]
 name = "zen-types"
-version = "2.0.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8853dc6a80505b7096dae2a171b8a6a22ccb34a251dcec5d54ded2ce1c892883"
+checksum = "22a273ad92f5ee4b5c0da22412074d1676bfae61886f87deec15c79e9766d601"
 dependencies = [
  "ahash 0.8.12",
  "hipstr",
