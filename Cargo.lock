@@ -3268,9 +3268,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.151"
+version = "1.0.154"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
+checksum = "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
 dependencies = [
  "itoa",
  "memchr",
@@ -4048,9 +4048,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.53.2"
+version = "1.53.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
+checksum = "ce3335fa71841cda333a58d7615b03901380ecf09d59b3296d21f8bbac0dde4e"
 dependencies = [
  "bytes",
  "libc",
@@ -4707,9 +4707,9 @@ dependencies = [
 
 [[package]]
 name = "zen-engine"
-version = "2.1.2"
+version = "2.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aee7f2b0d1d9ecbcbb6a5e97b720597e23b391052f01fbcd9bad70dbae84336e"
+checksum = "cb105591ec3ba6b67fabdd6015d40f257b8bac00d3a75deef84e0a12667ba96a"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4750,9 +4750,9 @@ dependencies = [
 
 [[package]]
 name = "zen-expression"
-version = "2.1.2"
+version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f744c9d463bc8f8666bc9948d3776e0308ad1c3691607b62051684471b85b8f"
+checksum = "259b3c16e9fd2300216d4059ae72a6cf846024aa3d4a0d15787436d3feae7342"
 dependencies = [
  "ahash 0.8.12",
  "anyhow",
@@ -4781,9 +4781,9 @@ dependencies = [
 
 [[package]]
 name = "zen-macros"
-version = "2.1.2"
+version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21d180d2c43d0fc0b5ed75463615ebd6b842c1282505f158096f8e5b17f66489"
+checksum = "2f5372c74e13f11e225edc203849fa7de584935e417a3196f2ec3842a9f3e6d1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4793,9 +4793,9 @@ dependencies = [
 
 [[package]]
 name = "zen-tmpl"
-version = "2.1.2"
+version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ae6d0c522420b75fefb15edd58f7096c01a5bc568538ecd72db48a1b74f8670"
+checksum = "7b2b318172a0995309037e3050a25be3c4f7859f3bd6a7fabfc083df3714a04e"
 dependencies = [
  "serde",
  "serde_json",
@@ -4805,9 +4805,9 @@ dependencies = [
 
 [[package]]
 name = "zen-types"
-version = "2.1.2"
+version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22a273ad92f5ee4b5c0da22412074d1676bfae61886f87deec15c79e9766d601"
+checksum = "6a7fed3b086a8cec31006f5434002597d586ae7f82822b647eea278507354fed"
 dependencies = [
  "ahash 0.8.12",
  "hipstr",
